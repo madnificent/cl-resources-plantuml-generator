@@ -1,5 +1,20 @@
 (in-package :plantuml-generator)
 
+(declaim (optimize (debug 3) (speed 0)))
+
+
+(define-condition undefined-resource (simple-error)
+  ()
+  (:report (lambda (c s) (format s "Could not find name for undefined resource."))))
+
+(define-condition resource-not-found (simple-error)
+  ((resource-name :initarg :resource-name :reader error-resource-name)
+   (path :initarg :path :reader error-resource-path :initform "none"))
+  (:report (lambda (c s) (format s "Could not find resource from name ~A on path ~A"
+                            (error-resource-name c)
+                            (error-resource-path c)))))
+
+
 (defun all-resources ()
   (loop for val being
      the hash-values of mu-cl-resources::*resources*
@@ -51,9 +66,14 @@
   (format nil "~{~&\"~A\" --> \"1\" \"~A\" : ~A > ~&~}"
           (loop for relationship in (mu-cl-resources::has-one-links resource)
              append (list (resource-name resource) ; from
-                          (resource-name ; to
-                           (mu-cl-resources::find-resource-by-name
-                            (mu-cl-resources::resource-name relationship)))
+                          (handler-case
+                              (resource-name ; to
+                               (mu-cl-resources::find-resource-by-name
+                                (mu-cl-resources::resource-name relationship)))
+                            (undefined-resource (u)
+                              (error 'resource-not-found
+                                     :resource-name (resource-name resource)
+                                     :path (mu-cl-resources::request-path relationship))))
                           (mu-cl-resources::request-path relationship)))))
 
 (defun emit-has-many-relationships (resource)
@@ -61,14 +81,20 @@
   (format nil "~{~&\"~A\" --> \"*\" \"~A\" : ~A > ~&~}"
           (loop for relationship in (mu-cl-resources::has-many-links resource)
              append (list (resource-name resource) ; from
-                          (resource-name ; to
-                           (mu-cl-resources::find-resource-by-name
-                            (mu-cl-resources::resource-name relationship)))
+                          (handler-case
+                              (resource-name ; to
+                               (mu-cl-resources::find-resource-by-name
+                                (mu-cl-resources::resource-name relationship)))
+                            (undefined-resource (u)
+                              (error 'resource-not-found
+                                     :resource-name (resource-name resource)
+                                     :path (mu-cl-resources::request-path relationship))))
                           (mu-cl-resources::request-path relationship)))))
 
 
 ;;;; helpers
-
 (defun resource-name (resource)
   "Returns the name of the resource in this diagram."
+  (unless resource
+    (error 'undefined-resource))
   (mu-cl-resources::json-type resource))
