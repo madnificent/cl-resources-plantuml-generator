@@ -1,4 +1,4 @@
-FROM semtech/mu-cl-resources
+FROM semtech/mu-cl-resources:feature-inheritance
 
 COPY . /app/dependencies/resources-openapi-generator/
 ADD ./startup.lisp /usr/src/startup.lisp

@@ -43,10 +43,11 @@
 
 (defun emit-resource-description (resource)
   "Emits the specification for an individual resource"
-  (format nil "~&class \"~A\"~&~A~&~A~&"
+  (format nil "~&class \"~A\"~&~A~&~A~&~A~&"
           (resource-name resource)
           (emit-resource-attributes resource)
-          (emit-resource-relationships resource)))
+          (emit-resource-relationships resource)
+          (emit-resource-types resource)))
 
 (defun emit-resource-attributes (resource)
   "Emits information on the attributes of a resource"
@@ -90,6 +91,13 @@
                                      :resource-name (resource-name resource)
                                      :path (mu-cl-resources::request-path relationship))))
                           (mu-cl-resources::request-path relationship)))))
+
+(defun emit-resource-types (resource)
+  "Emits the inheritance for resource"
+  (format nil "~{~&\"~A\" <|-- \"~A\"~%~}"
+          (loop for superclass in (mu-cl-resources::superclass-names resource)
+                append (list (resource-name (mu-cl-resources::find-resource-by-name superclass))
+                             (resource-name resource)))))
 
 
 ;;;; helpers
