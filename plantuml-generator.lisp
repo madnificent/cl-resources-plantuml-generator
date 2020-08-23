@@ -52,7 +52,7 @@
 (defun emit-resource-attributes (resource)
   "Emits information on the attributes of a resource"
   (format nil "~{~&\"~A\" : ~A~&~}"
-          (loop for attribute in (mu-cl-resources::ld-properties resource)
+          (loop for attribute in (mu-cl-resources::direct-ld-properties resource)
              append (list (resource-name resource)
                           (string-downcase (mu-cl-resources::json-key attribute))))))
 
@@ -65,7 +65,7 @@
 (defun emit-has-one-relationships (resource)
   "Emits relationships information for has-one relationships of a resource"
   (format nil "~{~&\"~A\" --> \"1\" \"~A\" : ~A > ~&~}"
-          (loop for relationship in (mu-cl-resources::has-one-links resource)
+          (loop for relationship in (mu-cl-resources::direct-has-one-links resource)
              append (list (resource-name resource) ; from
                           (handler-case
                               (resource-name ; to
@@ -80,7 +80,7 @@
 (defun emit-has-many-relationships (resource)
   "Emits relationships information for has-many relationships of a resource"
   (format nil "~{~&\"~A\" --> \"*\" \"~A\" : ~A > ~&~}"
-          (loop for relationship in (mu-cl-resources::has-many-links resource)
+          (loop for relationship in (mu-cl-resources::direct-has-many-links resource)
              append (list (resource-name resource) ; from
                           (handler-case
                               (resource-name ; to
