@@ -5,7 +5,9 @@
 
 (define-condition undefined-resource (simple-error)
   ()
-  (:report (lambda (c s) (format s "Could not find name for undefined resource."))))
+  (:report (lambda (c s)
+             (declare (ignore c))
+             (format s "Could not find name for undefined resource."))))
 
 (define-condition resource-not-found (simple-error)
   ((resource-name :initarg :resource-name :reader error-resource-name)
@@ -72,6 +74,7 @@
                                (mu-cl-resources::find-resource-by-name
                                 (mu-cl-resources::resource-name relationship)))
                             (undefined-resource (u)
+                              (declare (ignore u))
                               (error 'resource-not-found
                                      :resource-name (resource-name resource)
                                      :path (mu-cl-resources::request-path relationship))))
@@ -87,6 +90,7 @@
                                (mu-cl-resources::find-resource-by-name
                                 (mu-cl-resources::resource-name relationship)))
                             (undefined-resource (u)
+                              (declare (ignore u))
                               (error 'resource-not-found
                                      :resource-name (resource-name resource)
                                      :path (mu-cl-resources::request-path relationship))))
