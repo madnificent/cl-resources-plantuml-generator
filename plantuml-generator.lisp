@@ -18,9 +18,13 @@
 
 
 (defun all-resources ()
-  (loop for val being
-     the hash-values of mu-cl-resources::*resources*
-     collect val))
+  (let (values)
+    (org.shirakumo.luckless.hashtable:maphash
+     (lambda (k v)
+       (declare (ignore k))
+       (push v values))
+     mu-cl-resources::*resources*)
+    (reverse values)))
 
 (defun generate ()
   "Construct full plantuml content."

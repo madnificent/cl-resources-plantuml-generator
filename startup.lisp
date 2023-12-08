@@ -24,8 +24,7 @@
 (format t "~& >> docker loading boot ... ~%")
 (when (env-value :boot)
   (let ((name (string-upcase (env-value :boot))))
-    (ql:quickload name)
-    (funcall (find-symbol "BOOT" name))))
+    (ql:quickload name)))
 (format t "~& >> docker finished loading boot ~%")
 
 
